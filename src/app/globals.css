@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (Tailwind v4 + ThemeProvider) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #fafafa;
+  --foreground: #171717;
+  --muted: #737373;
+  --border: #e5e5e5;
+  --surface: #ffffff;
+  --accent: #171717;
+  --accent-fg: #ffffff;
+  --sale: #b91c1c;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --muted: #a3a3a3;
+  --border: #262626;
+  --surface: #171717;
+  --accent: #f5f5f5;
+  --accent-fg: #0a0a0a;
+  --sale: #f87171;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-sale: var(--sale);
+  --font-sans: var(--font-inter), var(--font-myanmar), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+@keyframes headerMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Soft page atmosphere without flat single-tone look */
+.page-shell {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, #f0f0f0 0%, transparent 55%),
+    var(--background);
+}
+
+.dark .page-shell {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, #1a1a1a 0%, transparent 55%),
+    var(--background);
+}
+
+/* Mobile-first storefront content width + padding */
+.storefront-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 72rem; /* max-w-6xl */
+  padding-inline: 1rem; /* px-4 */
+  padding-block: 1.5rem; /* py-6 */
+}
+
+@media (min-width: 768px) {
+  .storefront-container {
+    padding-inline: 2rem; /* md:px-8 */
+    padding-block: 2.5rem; /* md:py-10 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .storefront-container {
+    padding-inline: 3rem; /* lg:px-12 */
+  }
+}
+
+/* Product listing grids: 2 → 3 → 4 columns */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Search/results grid beside filters */
+.product-grid-filtered {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .product-grid-filtered {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid-filtered {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Legal / policy long-form reading layout (prose-like) */
+.legal-prose {
+  color: var(--foreground);
+  font-size: 0.975rem;
+  line-height: 1.7;
+}
+
+.legal-prose h1 {
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+}
+
+.legal-prose .lead {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.legal-prose .meta {
+  font-size: 0.75rem;
+  margin: 0 0 2rem;
+  opacity: 0.85;
+}
+
+.legal-prose h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.legal-prose p {
+  margin: 0 0 1rem;
+}
+
+.legal-prose ul {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.legal-prose li {
+  margin: 0.35rem 0;
+}
+
+.legal-prose li::marker {
+  color: var(--muted);
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+/* Wordmark logo — authoritative, premium, distinct from body copy */
+.brand-logo {
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  background: linear-gradient(120deg, #0a0a0a 0%, #2a2a2a 45%, #525252 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .brand-logo {
+  background: linear-gradient(120deg, #fafafa 0%, #e5e5e5 45%, #a3a3a3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .packing-slip {
+    color: #000 !important;
+  }
+
+  .brand-logo {
+    background: none !important;
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+  }
+}
+
