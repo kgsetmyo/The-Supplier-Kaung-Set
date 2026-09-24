@@ -45,7 +45,7 @@ function applyCsp(response: NextResponse, nonce: string, csp: string) {
   return response;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const csp = buildContentSecurityPolicy(nonce, {
     isDev: process.env.NODE_ENV === "development",

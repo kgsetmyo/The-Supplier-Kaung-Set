@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { OrderShippedEmail } from "@/emails/OrderShippedEmail";
+import { renderOrderShippedEmailHtml } from "@/emails/OrderShippedEmail";
 
 export type SendOrderShippedInput = {
   to: string;
@@ -48,7 +48,7 @@ export async function sendOrderShippedEmail(
       from: fromAddress(),
       to,
       subject: `Your order #${shortId} has shipped — ${input.trackingNumber}`,
-      react: OrderShippedEmail({
+      html: renderOrderShippedEmailHtml({
         customerName: input.customerName,
         orderId: input.orderId,
         trackingNumber: input.trackingNumber,
