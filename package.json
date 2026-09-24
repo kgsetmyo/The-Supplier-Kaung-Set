@@ -8,6 +8,12 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "@swc/core": true,
+    "protobufjs": true,
+    "unrs-resolver": true
+  },
   "dependencies": {
     "@google-analytics/data": "^7.1.0",
     "@next/third-parties": "^16.3.5",
