@@ -12,10 +12,10 @@ export function categoryOptionLabel(category: Category, locale: string) {
     : categoryLabel(category, locale);
 }
 
-export function childrenOf(
-  categories: Category[],
+export function childrenOf<T extends Category>(
+  categories: T[],
   parentId: string | null
-): Category[] {
+): T[] {
   const parentKey = parentId ? String(parentId) : null;
   return categories
     .filter((c) => (c.parent_id ? String(c.parent_id) : null) === parentKey)
