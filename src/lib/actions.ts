@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { userHasAdminAccess } from "@/lib/admin-access";
 import type { OrderStatus } from "@/types/database";
 
 export type UpdateFulfillmentInput = {
@@ -22,13 +23,7 @@ async function requireAdminClient() {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" as const, supabase, user: null };
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profile?.role !== "admin") {
+  if (!(await userHasAdminAccess(supabase, user))) {
     return { error: "Forbidden" as const, supabase, user };
   }
   return { error: null, supabase, user };
@@ -209,12 +204,9 @@ export async function updateLoyaltyTierConfig(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, message: "Unauthorized" };
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (profile?.role !== "admin") return { ok: false, message: "Forbidden" };
+  if (!(await userHasAdminAccess(supabase, user))) {
+    return { ok: false, message: "Forbidden" };
+  }
 
   const { error } = await supabase
     .from("loyalty_tiers")
@@ -284,13 +276,7 @@ async function requireAdmin() {
   } = await supabase.auth.getUser();
   if (!user) return { supabase, error: "Unauthorized" as const };
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profile?.role !== "admin") {
+  if (!(await userHasAdminAccess(supabase, user))) {
     return { supabase, error: "Forbidden" as const };
   }
 

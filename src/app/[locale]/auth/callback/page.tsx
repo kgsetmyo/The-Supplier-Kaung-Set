@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { userHasAdminAccess } from "@/lib/admin-access";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -24,18 +25,12 @@ export default async function AuthCallbackPage({ params, searchParams }: Props) 
     redirect(`/${locale}/login`);
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
   if (next) {
     const dest = next.startsWith("/") ? next : `/${locale}/${next}`;
     redirect(dest);
   }
 
-  if (profile?.role === "admin") {
+  if (await userHasAdminAccess(supabase, user)) {
     redirect(`/${locale}/admin`);
   }
 

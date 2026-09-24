@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
 import { updateSession } from "./lib/supabase/middleware";
 import { buildContentSecurityPolicy } from "./lib/csp";
+import { userHasAdminAccess } from "./lib/admin-access";
 
 const handleI18n = createIntlMiddleware(routing);
 
@@ -19,14 +20,6 @@ function stripLocale(pathname: string) {
   return { locale: routing.defaultLocale, path: pathname };
 }
 
-/** Comma-separated allowlist from ADMIN_EMAIL (case-insensitive). */
-function adminEmailAllowlist(): string[] {
-  return (process.env.ADMIN_EMAIL ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 function isAdminPath(path: string) {
   return (
     path === "/admin" ||
@@ -34,29 +27,6 @@ function isAdminPath(path: string) {
     path === "/dashboard" ||
     path.startsWith("/dashboard/")
   );
-}
-
-function isAllowedAdminEmail(email: string | undefined): boolean {
-  const allow = adminEmailAllowlist();
-  if (allow.length === 0) return false;
-  if (!email) return false;
-  return allow.includes(email.trim().toLowerCase());
-}
-
-/** Admin if email is on ADMIN_EMAIL allowlist OR profiles.role = admin. */
-async function isAdminUser(
-  supabase: Awaited<ReturnType<typeof updateSession>>["supabase"],
-  user: NonNullable<Awaited<ReturnType<typeof updateSession>>["user"]>
-): Promise<boolean> {
-  if (isAllowedAdminEmail(user.email)) return true;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  return profile?.role === "admin";
 }
 
 /** Attach CSP + expose nonce to Server Components without reconstructing NextRequest. */
@@ -106,7 +76,7 @@ export async function middleware(request: NextRequest) {
       return applyCsp(NextResponse.redirect(loginUrl), nonce, csp);
     }
 
-    if (!(await isAdminUser(supabase, user))) {
+    if (!(await userHasAdminAccess(supabase, user))) {
       const denied = new URL(`/${locale}`, request.url);
       denied.searchParams.set("admin", "denied");
       return applyCsp(NextResponse.redirect(denied), nonce, csp);
@@ -120,7 +90,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && user) {
-    const isAdmin = await isAdminUser(supabase, user);
+    const isAdmin = await userHasAdminAccess(supabase, user);
     const dest = isAdmin
       ? new URL(`/${locale}/admin`, request.url)
       : new URL(`/${locale}`, request.url);

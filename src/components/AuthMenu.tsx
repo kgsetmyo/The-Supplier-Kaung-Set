@@ -13,11 +13,11 @@ import {
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { UserRole } from "@/types/database";
+import { checkIsAdmin } from "@/app/actions/auth-nav";
 
 type AuthUser = {
   email: string;
-  role: UserRole;
+  isAdmin: boolean;
 };
 
 export function AuthMenu() {
@@ -43,15 +43,10 @@ export function AuthMenu() {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", authUser.id)
-        .maybeSingle();
-
+      const isAdmin = await checkIsAdmin();
       setUser({
         email: authUser.email ?? "",
-        role: (profile?.role as UserRole) ?? "user",
+        isAdmin,
       });
       setLoading(false);
     }
@@ -115,7 +110,9 @@ export function AuthMenu() {
       {open ? (
         <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-neutral-900">
           <div className="border-b border-gray-100 px-3 py-2 dark:border-gray-800">
-            <p className="truncate text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+            <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+              {user.email}
+            </p>
           </div>
           <Link
             href="/account"
@@ -149,7 +146,7 @@ export function AuthMenu() {
             <Heart className="size-4" />
             {t("wishlist")}
           </Link>
-          {user.role === "admin" ? (
+          {user.isAdmin ? (
             <Link
               href="/admin"
               onClick={() => setOpen(false)}

@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getPostLoginPath } from "@/app/actions/auth-nav";
 
 type Mode = "login" | "signup";
 
@@ -65,35 +66,10 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
       }
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    let role = "user";
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-      role = profile?.role ?? "user";
-    }
-
+    const dest = await getPostLoginPath(nextPath);
     setPending(false);
     router.refresh();
-
-    if (role === "admin") {
-      router.push("/admin");
-      return;
-    }
-
-    if (nextPath) {
-      const cleaned = nextPath.replace(/^\/(en|mm)/, "") || "/";
-      router.push(cleaned as "/");
-      return;
-    }
-
-    router.push("/");
+    router.push(dest as "/");
   }
 
   const fieldClass =

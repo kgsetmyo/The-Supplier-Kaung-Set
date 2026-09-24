@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { userHasAdminAccess } from "@/lib/admin-access";
 import type { Profile, UserRole } from "@/types/database";
 
 export async function getSessionUser() {
@@ -35,9 +36,11 @@ export async function getCurrentProfile(): Promise<(Profile & { email?: string }
 }
 
 export async function requireAdmin() {
-  const profile = await getCurrentProfile();
-  if (!profile || profile.role !== "admin") {
-    return null;
-  }
-  return profile;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  if (!(await userHasAdminAccess(supabase, user))) return null;
+  return getCurrentProfile();
 }
