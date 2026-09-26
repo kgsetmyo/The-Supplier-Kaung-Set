@@ -14,7 +14,14 @@ export type ProductActionResult =
   | { ok: true }
   | { ok: false; message: string };
 
-const uuidSchema = z.string().uuid("Invalid product id.");
+const productIdSchema = z
+  .string()
+  .trim()
+  .min(1, "Invalid product id.")
+  .regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    "Invalid product id."
+  );
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -37,7 +44,7 @@ async function requireAdmin() {
 export async function deleteProduct(
   productId: string
 ): Promise<ProductActionResult> {
-  const idParsed = uuidSchema.safeParse(productId);
+  const idParsed = productIdSchema.safeParse(productId);
   if (!idParsed.success) {
     return {
       ok: false,
