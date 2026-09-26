@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { PricingEligibility } from "@/lib/pricing";
+import { resolveLoyaltyTierFromSpend } from "@/lib/loyalty";
 import type {
   Category,
   ExplorerCategory,
@@ -317,26 +318,37 @@ export async function getStorefrontPricingContext(): Promise<{
     return { profile: null, tier: null, eligibility: emptyEligibility };
   }
 
+  const spend = Number(profile.lifetime_spend ?? 0);
+
+  // Resolve rank from spend + admin thresholds (same rules as LoyaltyCard).
+  const { data: tierRows } = await supabase
+    .from("loyalty_tiers")
+    .select("*")
+    .order("spend_threshold", { ascending: true });
+
+  const allTiers = (tierRows ?? []).map((row) => ({
+    ...row,
+    spend_threshold: Number(row.spend_threshold),
+    discount_percentage: Number(row.discount_percentage),
+  })) as LoyaltyTier[];
+
+  const tier = resolveLoyaltyTierFromSpend(spend, allTiers);
+
   const mappedProfile = {
     ...profile,
-    lifetime_spend: Number(profile.lifetime_spend ?? 0),
+    lifetime_spend: spend,
     email: user.email,
+    // Keep pricing helpers aligned with the spend-resolved tier.
+    loyalty_tier_id: tier?.id ?? null,
+    loyalty_tier: tier?.tier_name ?? "Member",
   } as Profile;
 
-  let tier: LoyaltyTier | null = null;
-  if (profile.loyalty_tier_id) {
-    const { data: tierRow } = await supabase
-      .from("loyalty_tiers")
-      .select("*")
-      .eq("id", profile.loyalty_tier_id)
-      .maybeSingle();
-    if (tierRow) {
-      tier = {
-        ...tierRow,
-        spend_threshold: Number(tierRow.spend_threshold),
-        discount_percentage: Number(tierRow.discount_percentage),
-      } as LoyaltyTier;
-    }
+  if (!tier) {
+    return {
+      profile: mappedProfile,
+      tier: null,
+      eligibility: emptyEligibility,
+    };
   }
 
   const [{ data: tierCats }, { data: brandRules }, categories] =
@@ -344,11 +356,11 @@ export async function getStorefrontPricingContext(): Promise<{
       supabase
         .from("loyalty_tier_categories")
         .select("tier_id, category_id")
-        .eq("tier_id", profile.loyalty_tier_id ?? ""),
+        .eq("tier_id", tier.id),
       supabase
         .from("loyalty_discount_rules")
         .select("tier_id, brand_id")
-        .eq("tier_id", profile.loyalty_tier_id ?? "")
+        .eq("tier_id", tier.id)
         .not("brand_id", "is", null),
       getStorefrontCategories(),
     ]);

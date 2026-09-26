@@ -27,6 +27,9 @@ export type PricingEligibility = {
  * VIP tier price when the product is eligible for the user's loyalty tier.
  * Category eligibility uses hierarchical match (parent includes descendants).
  * No category rows for the tier ⇒ unrestricted (all products).
+ *
+ * Pass the spend-resolved `tier` from getStorefrontPricingContext so the
+ * discount % and eligible categories match Admin → Loyalty settings.
  */
 export function calculateDiscountedPrice(
   product: Product,
@@ -36,7 +39,8 @@ export function calculateDiscountedPrice(
 ): DiscountedPriceResult {
   const basePrice = getUnitPrice(product);
 
-  if (!userProfile?.loyalty_tier_id || !tier) {
+  const tierId = tier?.id ?? userProfile?.loyalty_tier_id ?? null;
+  if (!tierId || !tier) {
     return {
       basePrice,
       finalPrice: basePrice,
@@ -45,7 +49,6 @@ export function calculateDiscountedPrice(
     };
   }
 
-  const tierId = userProfile.loyalty_tier_id;
   let eligible = false;
 
   if (Array.isArray(eligibility)) {
@@ -56,7 +59,6 @@ export function calculateDiscountedPrice(
         ((rule.category_id && rule.category_id === product.category_id) ||
           (rule.brand_id && rule.brand_id === product.brand_id))
     );
-    // Legacy: no rules ⇒ not eligible (old behavior). Prefer PricingEligibility.
   } else {
     const links = eligibility.tierCategories.filter((r) => r.tier_id === tierId);
     const brandOk =
