@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useEffect, useState, useTransition, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
+import { deleteProduct } from "@/app/actions/product";
 import {
   formatMoney,
   PRODUCT_AUTHENTICITY_OPTIONS,
@@ -42,6 +43,16 @@ export function InventoryAdmin({
   const [form, setForm] = useState(emptyForm);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(() => setToast(null), 4200);
+    return () => window.clearTimeout(id);
+  }, [toast]);
 
   function openCreate() {
     setCreating(true);
@@ -80,6 +91,41 @@ export function InventoryAdmin({
     setEditing(null);
     setForm(emptyForm);
     setError(null);
+  }
+
+  function askDelete(product: Product) {
+    setDeleteTarget(product);
+    setDeleteError(null);
+  }
+
+  function closeDelete() {
+    if (deleting) return;
+    setDeleteTarget(null);
+    setDeleteError(null);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget || deleting) return;
+    const id = deleteTarget.id;
+    const wasEditing = editing?.id === id;
+    setDeleteError(null);
+    setDeleting(true);
+
+    try {
+      const result = await deleteProduct(id);
+      if (!result.ok) {
+        setDeleteError(result.message || t("deleteFailed"));
+        return;
+      }
+      setDeleteTarget(null);
+      if (wasEditing) closeForm();
+      setToast(t("deleteSuccess"));
+      startTransition(() => router.refresh());
+    } catch {
+      setDeleteError(t("deleteFailed"));
+    } finally {
+      setDeleting(false);
+    }
   }
 
   async function onSubmit(e: FormEvent) {
@@ -124,6 +170,15 @@ export function InventoryAdmin({
 
   return (
     <div className="space-y-6">
+      {toast ? (
+        <div
+          role="status"
+          className="fixed right-4 bottom-4 z-50 max-w-sm border border-border bg-surface px-4 py-3 text-sm shadow-lg"
+        >
+          {toast}
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">
           {t("inventory")}
@@ -377,19 +432,75 @@ export function InventoryAdmin({
                   <StockStatusBadge quantity={product.stock_quantity} />
                 </td>
                 <td className="px-3 py-3 text-right">
-                  <button
-                    type="button"
-                    onClick={() => openEdit(product)}
-                    className="text-sm underline underline-offset-4"
-                  >
-                    {t("editProduct")}
-                  </button>
+                  <div className="flex flex-wrap items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(product)}
+                      className="text-sm underline underline-offset-4"
+                    >
+                      {t("editProduct")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => askDelete(product)}
+                      className="rounded-md px-2 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                    >
+                      {t("deleteProduct")}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {deleteTarget ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-product-title"
+        >
+          <div className="w-full max-w-md border border-border bg-surface p-5 shadow-lg">
+            <h2
+              id="delete-product-title"
+              className="text-lg font-semibold tracking-tight"
+            >
+              {t("deleteConfirmTitle")}
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              {t("deleteConfirmBody", {
+                name:
+                  locale === "mm"
+                    ? deleteTarget.name_mm
+                    : deleteTarget.name_en,
+              })}
+            </p>
+            {deleteError ? (
+              <p className="mt-3 text-sm text-sale">{deleteError}</p>
+            ) : null}
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeDelete}
+                disabled={deleting}
+                className="rounded-md border border-border px-4 py-2 text-sm disabled:opacity-50"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => void confirmDelete()}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? t("deleting") : t("deleteConfirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
