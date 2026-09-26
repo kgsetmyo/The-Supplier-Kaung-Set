@@ -77,6 +77,8 @@ export function buildContentSecurityPolicy(
     `img-src ${imgSrc}`,
     "font-src 'self' data: https://fonts.gstatic.com",
     `connect-src ${connectSrc}`,
+    // Vercel Deployment Protection rewrites the PWA manifest via sso-api.
+    "manifest-src 'self' https://vercel.com",
     "frame-src 'self' https://www.googletagmanager.com",
     "frame-ancestors 'self'",
     "base-uri 'self'",

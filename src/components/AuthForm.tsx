@@ -115,26 +115,46 @@ export function AuthForm({
       }
     }
 
-    // Wait until the browser client has a session before asking the server
-    // where to go (server actions can miss brand-new auth cookies).
+    // Use local session only — auth.getUser() / server actions can hang while
+    // cookies sync, leaving the form stuck on "Please wait…" until refresh.
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user) {
       setPending(false);
       setError(t("error"));
       return;
     }
 
-    let dest = await getPostLoginPath(nextPath);
-    if (dest === "/" && !nextPath) {
-      // One retry if the server action raced the cookie write
-      await new Promise((r) => setTimeout(r, 150));
-      dest = await getPostLoginPath(nextPath);
+    let dest = "/";
+    if (nextPath) {
+      const cleaned = nextPath.replace(/^\/(en|mm)/, "") || "/";
+      dest = cleaned.startsWith("/admin") ? cleaned : cleaned;
+    } else {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (profile?.role === "admin") {
+        dest = "/admin";
+      } else {
+        // ADMIN_EMAIL allowlist is server-only; don't block forever on it.
+        try {
+          dest = await Promise.race([
+            getPostLoginPath(undefined),
+            new Promise<string>((resolve) =>
+              setTimeout(() => resolve("/"), 500)
+            ),
+          ]);
+        } catch {
+          dest = "/";
+        }
+      }
     }
 
-    // Full navigation so proxy/middleware and RSC pick up the session.
-    // Soft router.push + refresh often leaves the login page stuck until refresh.
+    // Full page load so proxy + RSC see the new session cookies.
     const href =
       dest === "/" || dest === ""
         ? `/${locale}`
