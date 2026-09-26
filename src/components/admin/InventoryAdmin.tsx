@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { deleteProduct } from "@/app/actions/product";
+import { deleteProduct, restoreProduct } from "@/app/actions/product";
 import {
   formatMoney,
   PRODUCT_AUTHENTICITY_OPTIONS,
@@ -119,10 +119,30 @@ export function InventoryAdmin({
       }
       setDeleteTarget(null);
       if (wasEditing) closeForm();
-      setToast(t("deleteSuccess"));
+      setToast(
+        result.mode === "unlisted" ? t("unlistSuccess") : t("deleteSuccess")
+      );
       startTransition(() => router.refresh());
     } catch {
       setDeleteError(t("deleteFailed"));
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function onRestore(product: Product) {
+    setDeleting(true);
+    setError(null);
+    try {
+      const result = await restoreProduct(product.id);
+      if (!result.ok) {
+        setToast(result.message || t("restoreFailed"));
+        return;
+      }
+      setToast(t("restoreSuccess"));
+      startTransition(() => router.refresh());
+    } catch {
+      setToast(t("restoreFailed"));
     } finally {
       setDeleting(false);
     }
@@ -406,6 +426,11 @@ export function InventoryAdmin({
                     {locale === "mm" ? product.name_mm : product.name_en}
                   </p>
                   <p className="text-xs text-muted">{product.name_en}</p>
+                  {product.is_active === false ? (
+                    <span className="mt-1 inline-flex rounded border border-amber-600/40 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                      {t("unlistedBadge")}
+                    </span>
+                  ) : null}
                 </td>
                 <td className="px-3 py-3 text-muted">
                   {categoryBreadcrumb(
@@ -440,13 +465,24 @@ export function InventoryAdmin({
                     >
                       {t("editProduct")}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => askDelete(product)}
-                      className="rounded-md px-2 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                    >
-                      {t("deleteProduct")}
-                    </button>
+                    {product.is_active === false ? (
+                      <button
+                        type="button"
+                        disabled={deleting}
+                        onClick={() => void onRestore(product)}
+                        className="rounded-md px-2 py-1 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                      >
+                        {t("restoreProduct")}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => askDelete(product)}
+                        className="rounded-md px-2 py-1 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                      >
+                        {t("deleteProduct")}
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -477,6 +513,7 @@ export function InventoryAdmin({
                     : deleteTarget.name_en,
               })}
             </p>
+            <p className="mt-2 text-xs text-muted">{t("deleteConfirmOrdersHint")}</p>
             {deleteError ? (
               <p className="mt-3 text-sm text-sale">{deleteError}</p>
             ) : null}

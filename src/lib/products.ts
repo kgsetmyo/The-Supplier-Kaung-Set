@@ -53,6 +53,7 @@ function mapProduct(row: Record<string, unknown>): Product {
     category_id: (row.category_id as string | null) ?? null,
     brand_id: (row.brand_id as string | null) ?? null,
     authenticity,
+    is_active: row.is_active !== false,
     created_at: String(row.created_at),
   };
 }
@@ -70,6 +71,7 @@ export async function getProducts(
   let query = supabase
     .from("products")
     .select("*")
+    .eq("is_active", true)
     .order("created_at", { ascending: true });
 
   const term = filters.q ? sanitizeSearchTerm(filters.q) : "";
@@ -154,6 +156,7 @@ export async function getProductById(id: string): Promise<Product | null> {
     .from("products")
     .select("*")
     .eq("id", id)
+    .eq("is_active", true)
     .maybeSingle();
 
   if (error) {
@@ -228,6 +231,7 @@ export async function getExplorerCategories(): Promise<ExplorerCategory[]> {
   const { data: products, error } = await supabase
     .from("products")
     .select("category_id, image_url, image_urls")
+    .eq("is_active", true)
     .not("category_id", "is", null);
 
   if (error) {

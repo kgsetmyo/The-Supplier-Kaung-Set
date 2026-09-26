@@ -53,6 +53,8 @@ export type Product = {
   category_id?: string | null;
   brand_id?: string | null;
   authenticity?: ProductAuthenticity;
+  /** When false, hidden from storefront (kept for order history). */
+  is_active?: boolean;
   created_at: string;
 };
 

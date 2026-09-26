@@ -107,6 +107,7 @@ export async function getAdminProducts() {
       row.authenticity === "Genuine"
         ? row.authenticity
         : "Genuine",
+    is_active: row.is_active !== false,
   })) as Product[];
 }
 
