@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getPostLoginPath } from "@/app/actions/auth-nav";
 import { getAuthCallbackUrl } from "@/lib/site-url";
@@ -24,7 +24,6 @@ export function AuthForm({
 }: AuthFormProps) {
   const t = useTranslations("auth");
   const locale = useLocale();
-  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(() => {
     if (initialError === "VerificationFailed") {
@@ -116,10 +115,31 @@ export function AuthForm({
       }
     }
 
-    const dest = await getPostLoginPath(nextPath);
-    setPending(false);
-    router.refresh();
-    router.push(dest as "/");
+    // Wait until the browser client has a session before asking the server
+    // where to go (server actions can miss brand-new auth cookies).
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setPending(false);
+      setError(t("error"));
+      return;
+    }
+
+    let dest = await getPostLoginPath(nextPath);
+    if (dest === "/" && !nextPath) {
+      // One retry if the server action raced the cookie write
+      await new Promise((r) => setTimeout(r, 150));
+      dest = await getPostLoginPath(nextPath);
+    }
+
+    // Full navigation so proxy/middleware and RSC pick up the session.
+    // Soft router.push + refresh often leaves the login page stuck until refresh.
+    const href =
+      dest === "/" || dest === ""
+        ? `/${locale}`
+        : `/${locale}${dest.startsWith("/") ? dest : `/${dest}`}`;
+    window.location.assign(href);
   }
 
   const fieldClass =
