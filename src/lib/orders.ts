@@ -97,63 +97,63 @@ export async function placeOrder(
       ? input.totalAmount
       : merchandise;
 
+  const discountApplied = Math.max(0, Number(input.discountApplied ?? 0));
+  const couponId = input.couponId?.trim() || null;
+
+  const orderItems = input.items.map((item) => {
+    const unit =
+      typeof item.unitPrice === "number"
+        ? item.unitPrice
+        : getUnitPrice(item.product);
+    return {
+      product_id: item.product.id,
+      quantity: item.quantity,
+      price_at_time: unit,
+    };
+  });
+
   let lastError = "Failed to create order";
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const trackingNumber = generateTrackingNumber();
 
-    const discountApplied = Math.max(0, Number(input.discountApplied ?? 0));
-    const couponId = input.couponId?.trim() || null;
+    // SECURITY DEFINER RPC so guests (anon) can checkout without SELECT RLS blocks.
+    const { data, error } = await supabase.rpc("create_storefront_order", {
+      p_customer_info: input.customer,
+      p_items: orderItems,
+      p_total_amount: total,
+      p_payment_method: input.paymentMethod,
+      p_payment_plan: input.paymentPlan,
+      p_payment_screenshot_url: paymentScreenshotUrl,
+      p_payment_reference: isKbzPaymentMethod(input.paymentMethod)
+        ? input.paymentReference?.trim() || null
+        : null,
+      p_coupon_id: couponId,
+      p_discount_applied: discountApplied,
+      p_tracking_number: trackingNumber,
+    });
 
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        user_id: user?.id ?? null,
-        tracking_number: trackingNumber,
-        customer_info: input.customer,
-        total_amount: total,
-        status: "pending",
-        payment_method: input.paymentMethod,
-        payment_plan: input.paymentPlan,
-        payment_screenshot_url: paymentScreenshotUrl,
-        payment_reference: isKbzPaymentMethod(input.paymentMethod)
-          ? input.paymentReference?.trim() || null
-          : null,
-        payment_status: "pending",
-        coupon_id: couponId,
-        discount_applied: discountApplied,
-      })
-      .select("id, tracking_number")
-      .single();
-
-    if (orderError || !order) {
-      lastError = orderError?.message ?? lastError;
-      if (orderError?.code === "23505") continue;
+    if (error) {
+      lastError = error.message || lastError;
+      // Unique tracking collision — retry with a new number
+      if (error.code === "23505" || /tracking/i.test(error.message)) {
+        continue;
+      }
       return { ok: false, message: lastError };
     }
 
-    const orderItems = input.items.map((item) => ({
-      order_id: order.id,
-      product_id: item.product.id,
-      quantity: item.quantity,
-      price_at_time:
-        typeof item.unitPrice === "number"
-          ? item.unitPrice
-          : getUnitPrice(item.product),
-    }));
+    const row = data as {
+      order_id?: string;
+      tracking_number?: string;
+    } | null;
 
-    const { error: itemsError } = await supabase
-      .from("order_items")
-      .insert(orderItems);
+    const orderId = row?.order_id ? String(row.order_id) : "";
+    const tracking = row?.tracking_number
+      ? String(row.tracking_number)
+      : trackingNumber;
 
-    if (itemsError) {
-      return { ok: false, message: itemsError.message };
-    }
-
-    if (couponId) {
-      await supabase.rpc("increment_coupon_usage", {
-        p_coupon_id: couponId,
-      });
+    if (!orderId) {
+      return { ok: false, message: "Failed to create order" };
     }
 
     if (user?.id) {
@@ -162,8 +162,8 @@ export async function placeOrder(
 
     return {
       ok: true,
-      orderId: order.id,
-      trackingNumber: order.tracking_number,
+      orderId,
+      trackingNumber: tracking,
     };
   }
 
