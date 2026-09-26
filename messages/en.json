@@ -180,6 +180,7 @@
     "noAccount": "Need an account?",
     "hasAccount": "Already have an account?",
     "error": "Something went wrong. Please try again.",
+    "verificationFailed": "Email verification failed or the link expired. Please try signing in, or request a new confirmation email.",
     "checkEmailTitle": "Check your email",
     "checkEmailBody": "We sent a verification link to {email}. Open it to activate your account, then sign in.",
     "forgotPassword": "Forgot password?",

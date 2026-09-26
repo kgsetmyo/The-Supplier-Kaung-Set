@@ -51,6 +51,14 @@ export async function proxy(request: NextRequest) {
     isDev: process.env.NODE_ENV === "development",
   });
 
+  // Locale-agnostic auth callback must not be rewritten by next-intl
+  // (e.g. /auth/callback?code=... from Supabase email links).
+  if (request.nextUrl.pathname.startsWith("/auth/")) {
+    const passthrough = NextResponse.next();
+    const session = await updateSession(request, passthrough);
+    return applyCsp(session.response, nonce, csp);
+  }
+
   // Run next-intl first so locale redirects/rewrites are applied
   let response = handleI18n(request);
 

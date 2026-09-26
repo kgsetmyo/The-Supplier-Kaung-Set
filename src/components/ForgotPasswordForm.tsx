@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getAuthCallbackUrl } from "@/lib/site-url";
 
 export function ForgotPasswordForm() {
   const t = useTranslations("auth");
@@ -21,12 +22,8 @@ export function ForgotPasswordForm() {
     const email = String(form.get("email") ?? "").trim();
     const supabase = createClient();
 
-    const siteUrl = (
-      process.env.NEXT_PUBLIC_SITE_URL?.trim() || window.location.origin
-    ).replace(/\/$/, "");
-
-    // Exchange code via auth callback, then land on reset-password with a session
-    const redirectTo = `${siteUrl}/${locale}/auth/callback?next=/${locale}/reset-password`;
+    // Exchange code via /auth/callback, then land on reset-password with a session
+    const redirectTo = getAuthCallbackUrl(`/${locale}/reset-password`);
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email,

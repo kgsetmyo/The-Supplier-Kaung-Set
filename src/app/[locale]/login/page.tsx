@@ -5,12 +5,12 @@ import { Link } from "@/i18n/navigation";
 
 type Props = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 };
 
 export default async function LoginPage({ params, searchParams }: Props) {
   const { locale } = await params;
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
   setRequestLocale(locale);
 
   return (
@@ -22,7 +22,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
         <LanguageToggle />
       </div>
       <div className="flex flex-1 items-center justify-center px-4 py-10">
-        <AuthForm mode="login" nextPath={next} />
+        <AuthForm mode="login" nextPath={next} initialError={error ?? null} />
       </div>
     </main>
   );

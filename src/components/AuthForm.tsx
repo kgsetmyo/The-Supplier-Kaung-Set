@@ -2,23 +2,36 @@
 
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getPostLoginPath } from "@/app/actions/auth-nav";
+import { getAuthCallbackUrl } from "@/lib/site-url";
 
 type Mode = "login" | "signup";
 
 type AuthFormProps = {
   mode: Mode;
   nextPath?: string;
+  /** From ?error= on the login URL (e.g. VerificationFailed). */
+  initialError?: string | null;
 };
 
-export function AuthForm({ mode, nextPath }: AuthFormProps) {
+export function AuthForm({
+  mode,
+  nextPath,
+  initialError = null,
+}: AuthFormProps) {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => {
+    if (initialError === "VerificationFailed") {
+      return t("verificationFailed");
+    }
+    return initialError;
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [checkEmail, setCheckEmail] = useState<string | null>(null);
 
@@ -33,12 +46,15 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
     const supabase = createClient();
 
     if (mode === "signup") {
-      const origin = window.location.origin;
+      // Always use NEXT_PUBLIC_SITE_URL (via helper) so production emails
+      // never point at localhost from a mismatched client origin.
+      const emailRedirectTo = getAuthCallbackUrl(`/${locale}`);
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${origin}/en/auth/callback`,
+          emailRedirectTo,
         },
       });
 
@@ -133,7 +149,9 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
               type={showPassword ? "text" : "password"}
               required
               minLength={6}
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              autoComplete={
+                mode === "login" ? "current-password" : "new-password"
+              }
               className="w-full rounded-md border border-border bg-surface py-2 pr-10 pl-3 text-sm outline-none focus:border-foreground"
             />
             <button
