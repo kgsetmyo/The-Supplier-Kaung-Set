@@ -11,6 +11,7 @@ import { LoyaltyCard } from "@/components/LoyaltyCard";
 import { OrderHistoryList } from "@/components/OrderHistoryList";
 import { Link } from "@/i18n/navigation";
 import { formatMoney } from "@/types/database";
+import { resolveLoyaltyTierFromSpend } from "@/lib/loyalty";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -38,6 +39,11 @@ export default async function AccountDashboardPage({ params }: Props) {
   }
 
   const currencyPrefix = "Ks ";
+  const resolvedTier = resolveLoyaltyTierFromSpend(
+    Number(profile.lifetime_spend ?? 0),
+    tiers
+  );
+  const displayTier = resolvedTier?.tier_name || "Member";
 
   return (
     <AccountPageShell title={t("dashboardTitle")}>
@@ -82,9 +88,7 @@ export default async function AccountDashboardPage({ params }: Props) {
               <dt className="text-xs font-semibold uppercase">
                 {tProfile("tier")}
               </dt>
-              <dd className="mt-0.5 font-semibold">
-                {profile.loyalty_tier || "Member"}
-              </dd>
+              <dd className="mt-0.5 font-semibold">{displayTier}</dd>
             </div>
             <div>
               <dt className="text-xs font-semibold uppercase">

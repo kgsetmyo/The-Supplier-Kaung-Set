@@ -240,7 +240,17 @@ export async function updateLoyaltyTierConfig(
     if (insertError) return { ok: false, message: insertError.message };
   }
 
+  // Recompute every shopper's rank from lifetime_spend + updated thresholds.
+  const { error: syncError } = await supabase.rpc("sync_all_loyalty_tiers");
+  if (syncError) {
+    console.warn("[updateLoyaltyTierConfig] sync:", syncError.message);
+  }
+
   revalidatePath("/[locale]/admin/loyalty", "page");
+  revalidatePath("/[locale]/account", "page");
+  revalidatePath("/[locale]/profile", "page");
+  revalidatePath("/[locale]/checkout", "page");
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 

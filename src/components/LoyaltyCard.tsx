@@ -1,4 +1,8 @@
 import { formatMoney, type LoyaltyTier, type Profile } from "@/types/database";
+import {
+  nextLoyaltyTier,
+  resolveLoyaltyTierFromSpend,
+} from "@/lib/loyalty";
 
 type LoyaltyCardProps = {
   profile: Profile;
@@ -19,18 +23,11 @@ export function LoyaltyCard({
   labels,
 }: LoyaltyCardProps) {
   const spend = Number(profile.lifetime_spend ?? 0);
-  const sorted = [...tiers].sort(
-    (a, b) => Number(a.spend_threshold) - Number(b.spend_threshold)
-  );
-  const current =
-    sorted
-      .filter((t) => Number(t.spend_threshold) <= spend)
-      .sort((a, b) => Number(b.spend_threshold) - Number(a.spend_threshold))[0] ??
-    sorted[0];
-  const next = sorted.find(
-    (t) => Number(t.spend_threshold) > Number(current?.spend_threshold ?? 0)
-  );
-  const tierName = profile.loyalty_tier || current?.tier_name || "Member";
+  // Rank always comes from spend vs admin tier thresholds — not the stale
+  // profiles.loyalty_tier text (which used to default to "Elite").
+  const current = resolveLoyaltyTierFromSpend(spend, tiers);
+  const next = nextLoyaltyTier(current, tiers);
+  const tierName = current?.tier_name || "Member";
   const discount = Number(current?.discount_percentage ?? 0);
   const remaining = next
     ? Math.max(0, Number(next.spend_threshold) - spend)
@@ -42,7 +39,8 @@ export function LoyaltyCard({
           ((spend - Number(current?.spend_threshold ?? 0)) /
             Math.max(
               1,
-              Number(next.spend_threshold) - Number(current?.spend_threshold ?? 0)
+              Number(next.spend_threshold) -
+                Number(current?.spend_threshold ?? 0)
             )) *
             100
         )
@@ -54,16 +52,17 @@ export function LoyaltyCard({
     ? "from-[#1a1408] via-[#3d2e12] to-[#8a6a1f] text-[#f5e6b8] ring-[#c9a227]/40"
     : lower.includes("elite") || lower.includes("vip")
       ? "from-[#0c0c0c] via-[#1a1a1a] to-[#2a2a2a] text-white ring-white/10"
-      : // Member: light in day mode, dark zinc in night mode
-        "from-gray-50 via-white to-gray-100 text-gray-900 ring-gray-200 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 dark:text-gray-100 dark:ring-zinc-700";
+      : "from-gray-50 via-white to-gray-100 text-gray-900 ring-gray-200 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 dark:text-gray-100 dark:ring-zinc-700";
 
-  const trackClass = lower.includes("vvip") || lower.includes("elite") || lower.includes("vip")
-    ? "bg-white/20"
-    : "bg-gray-200 dark:bg-zinc-700";
+  const trackClass =
+    lower.includes("vvip") || lower.includes("elite") || lower.includes("vip")
+      ? "bg-white/20"
+      : "bg-gray-200 dark:bg-zinc-700";
 
-  const fillClass = lower.includes("vvip") || lower.includes("elite") || lower.includes("vip")
-    ? "bg-current opacity-80"
-    : "bg-gray-900 dark:bg-gray-100";
+  const fillClass =
+    lower.includes("vvip") || lower.includes("elite") || lower.includes("vip")
+      ? "bg-current opacity-80"
+      : "bg-gray-900 dark:bg-gray-100";
 
   return (
     <div
@@ -86,7 +85,9 @@ export function LoyaltyCard({
           <p className="text-[11px] font-semibold tracking-wide uppercase opacity-70 dark:text-gray-400 dark:opacity-100">
             {labels.lifetimeSpend}
           </p>
-          <p className="mt-1 text-xl font-semibold">{formatMoney(spend, currencyPrefix)}</p>
+          <p className="mt-1 text-xl font-semibold">
+            {formatMoney(spend, currencyPrefix)}
+          </p>
         </div>
         <div>
           <p className="text-[11px] font-semibold tracking-wide uppercase opacity-70 dark:text-gray-400 dark:opacity-100">

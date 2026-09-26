@@ -206,7 +206,7 @@ export function LoyaltyAdmin({
                       {formatMoney(Number(profile.lifetime_spend ?? 0))}
                     </td>
                     <td className="px-3 py-3">
-                      {profile.loyalty_tier || "Elite"}
+                      {profile.loyalty_tier || "—"}
                     </td>
                   </tr>
                 ))}
