@@ -227,7 +227,7 @@ export function LoyaltyAdmin({
                     {selected.profile.email || selected.profile.id}
                   </p>
                   <p className="text-muted">
-                    {t("tierName")}: {selected.profile.loyalty_tier || "Elite"}
+                    {t("tierName")}: {selected.profile.loyalty_tier || "—"}
                   </p>
                   <p className="text-muted">
                     {t("lifetimeSpend")}:{" "}
