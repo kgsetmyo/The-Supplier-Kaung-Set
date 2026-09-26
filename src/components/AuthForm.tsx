@@ -5,7 +5,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { getPostLoginPath } from "@/app/actions/auth-nav";
 import { getAuthCallbackUrl } from "@/lib/site-url";
 
 type Mode = "login" | "signup";
@@ -115,51 +114,17 @@ export function AuthForm({
       }
     }
 
-    // Use local session only — auth.getUser() / server actions can hang while
-    // cookies sync, leaving the form stuck on "Please wait…" until refresh.
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session?.user) {
-      setPending(false);
-      setError(t("error"));
-      return;
-    }
-
-    let dest = "/";
-    if (nextPath) {
-      const cleaned = nextPath.replace(/^\/(en|mm)/, "") || "/";
-      dest = cleaned.startsWith("/admin") ? cleaned : cleaned;
-    } else {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .maybeSingle();
-
-      if (profile?.role === "admin") {
-        dest = "/admin";
-      } else {
-        // ADMIN_EMAIL allowlist is server-only; don't block forever on it.
-        try {
-          dest = await Promise.race([
-            getPostLoginPath(undefined),
-            new Promise<string>((resolve) =>
-              setTimeout(() => resolve("/"), 500)
-            ),
-          ]);
-        } catch {
-          dest = "/";
-        }
-      }
-    }
-
-    // Full page load so proxy + RSC see the new session cookies.
+    // Navigate immediately after auth succeeds. Do not await getSession,
+    // profiles, or server actions here — those can hang and leave the UI on
+    // "Please wait…" even though cookies are already written (Ctrl+R works).
+    const cleaned = nextPath
+      ? nextPath.replace(/^\/(en|mm)/, "") || "/"
+      : "/";
     const href =
-      dest === "/" || dest === ""
+      cleaned === "/" || cleaned === ""
         ? `/${locale}`
-        : `/${locale}${dest.startsWith("/") ? dest : `/${dest}`}`;
-    window.location.assign(href);
+        : `/${locale}${cleaned.startsWith("/") ? cleaned : `/${cleaned}`}`;
+    window.location.href = href;
   }
 
   const fieldClass =
