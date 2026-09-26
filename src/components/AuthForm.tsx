@@ -34,6 +34,31 @@ export function AuthForm({
   });
   const [showPassword, setShowPassword] = useState(false);
   const [checkEmail, setCheckEmail] = useState<string | null>(null);
+  const [resendPending, setResendPending] = useState(false);
+  const [resendNote, setResendNote] = useState<string | null>(null);
+
+  async function resendVerification() {
+    if (!checkEmail || resendPending) return;
+    setResendPending(true);
+    setResendNote(null);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: checkEmail,
+      options: {
+        emailRedirectTo: getAuthCallbackUrl(`/${locale}`),
+      },
+    });
+
+    setResendPending(false);
+    if (resendError) {
+      setError(resendError.message || t("error"));
+      return;
+    }
+    setResendNote(t("resendVerificationSent"));
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -61,6 +86,15 @@ export function AuthForm({
       if (signUpError) {
         setPending(false);
         setError(signUpError.message || t("error"));
+        return;
+      }
+
+      // Supabase returns a user with empty identities when the email is
+      // already registered — no confirmation email is sent in that case.
+      const identities = data.user?.identities ?? [];
+      if (data.user && identities.length === 0) {
+        setPending(false);
+        setError(t("alreadyRegistered"));
         return;
       }
 
@@ -100,9 +134,24 @@ export function AuthForm({
         <p className="mt-2 text-sm text-muted">
           {t("checkEmailBody", { email: checkEmail })}
         </p>
+        <p className="mt-2 text-sm text-muted">{t("checkEmailSpamHint")}</p>
+        {error ? <p className="mt-3 text-sm text-sale">{error}</p> : null}
+        {resendNote ? (
+          <p className="mt-3 text-sm text-foreground">{resendNote}</p>
+        ) : null}
+        <button
+          type="button"
+          onClick={resendVerification}
+          disabled={resendPending}
+          className="mt-5 w-full rounded-md border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition hover:border-foreground/40 disabled:opacity-50"
+        >
+          {resendPending
+            ? t("resendVerificationSending")
+            : t("resendVerification")}
+        </button>
         <Link
           href="/login"
-          className="mt-6 inline-block text-sm font-medium underline underline-offset-4"
+          className="mt-4 inline-block text-sm font-medium underline underline-offset-4"
         >
           {t("submitLogin")}
         </Link>
