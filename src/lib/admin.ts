@@ -174,14 +174,8 @@ export async function getProfitAnalytics(): Promise<ProfitAnalytics> {
   const orderIds = new Set<string>();
 
   for (const order of data ?? []) {
-    const items = (order.order_items ?? []) as {
-      quantity: number;
-      price_at_time: number;
-      products: {
-        cost_price: number | null;
-        delivery_cost: number | null;
-      } | null;
-    }[];
+    const rawItems = order.order_items;
+    const items = Array.isArray(rawItems) ? rawItems : [];
 
     if (items.length === 0) continue;
     orderIds.add(String(order.id));
@@ -193,12 +187,16 @@ export async function getProfitAnalytics(): Promise<ProfitAnalytics> {
       unitsSold += qty;
       grossRevenue += qty * Number(item.price_at_time || 0);
 
-      const costPrice = Number(item.products?.cost_price ?? 0);
-      const deliveryCost = Number(item.products?.delivery_cost ?? 0);
+      const productJoin = item.products;
+      const product = Array.isArray(productJoin)
+        ? productJoin[0]
+        : productJoin;
+      const costPrice = Number(product?.cost_price ?? 0);
+      const deliveryCost = Number(product?.delivery_cost ?? 0);
       totalProductCost += qty * costPrice;
       totalDeliveryCost += qty * deliveryCost;
 
-      if (!item.products || (costPrice === 0 && deliveryCost === 0)) {
+      if (!product || (costPrice === 0 && deliveryCost === 0)) {
         missingCostUnits += qty;
       }
     }
