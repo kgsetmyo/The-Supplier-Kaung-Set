@@ -1,6 +1,5 @@
 "use client";
 
-import { sendGTMEvent } from "@next/third-parties/google";
 import { useLocale, useTranslations } from "next-intl";
 import type { Category, LoyaltyTier, Product, Profile } from "@/types/database";
 import { formatMoney } from "@/types/database";
@@ -10,6 +9,7 @@ import {
   type PricingEligibility,
 } from "@/lib/pricing";
 import { productGalleryUrls } from "@/lib/product-media";
+import { trackGaEvent } from "@/lib/ga";
 import { AuthenticityBadge } from "@/components/AuthenticityBadge";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { WishlistButton } from "@/components/WishlistButton";
@@ -152,23 +152,16 @@ export function ProductDetailView({
             type="button"
             disabled={outOfStock}
             onClick={() => {
-              sendGTMEvent({
-                event: "add_to_cart",
-                product_name: name,
-                product_id: product.id,
-                item_name: name,
-                item_id: product.id,
-                price: pricing.finalPrice,
-                ecommerce: {
-                  items: [
-                    {
-                      item_id: product.id,
-                      item_name: name,
-                      price: pricing.finalPrice,
-                      quantity: 1,
-                    },
-                  ],
-                },
+              trackGaEvent("add_to_cart", {
+                value: pricing.finalPrice,
+                items: [
+                  {
+                    item_id: product.id,
+                    item_name: name,
+                    price: pricing.finalPrice,
+                    quantity: 1,
+                  },
+                ],
               });
               addItem(product, 1, pricing.finalPrice);
             }}

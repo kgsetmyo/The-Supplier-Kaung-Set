@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { sendGTMEvent } from "@next/third-parties/google";
 import { useLocale, useTranslations } from "next-intl";
 import type { LoyaltyTier, Product, Profile } from "@/types/database";
 import { formatMoney } from "@/types/database";
@@ -11,6 +10,7 @@ import {
   type PricingEligibility,
 } from "@/lib/pricing";
 import { productGalleryUrls } from "@/lib/product-media";
+import { trackGaEvent } from "@/lib/ga";
 import { Link } from "@/i18n/navigation";
 import { AuthenticityBadge } from "@/components/AuthenticityBadge";
 import { WishlistButton } from "@/components/WishlistButton";
@@ -60,44 +60,30 @@ export function ProductCard({
   const cover = productGalleryUrls(product)[0] ?? null;
 
   function trackViewItem() {
-    sendGTMEvent({
-      event: "view_item",
-      product_name: name,
-      product_id: product.id,
-      item_name: name,
-      item_id: product.id,
-      price: pricing.finalPrice,
-      ecommerce: {
-        items: [
-          {
-            item_id: product.id,
-            item_name: name,
-            price: pricing.finalPrice,
-            quantity: 1,
-          },
-        ],
-      },
+    trackGaEvent("view_item", {
+      value: pricing.finalPrice,
+      items: [
+        {
+          item_id: product.id,
+          item_name: name,
+          price: pricing.finalPrice,
+          quantity: 1,
+        },
+      ],
     });
   }
 
   function trackAddToCart() {
-    sendGTMEvent({
-      event: "add_to_cart",
-      product_name: name,
-      product_id: product.id,
-      item_name: name,
-      item_id: product.id,
-      price: pricing.finalPrice,
-      ecommerce: {
-        items: [
-          {
-            item_id: product.id,
-            item_name: name,
-            price: pricing.finalPrice,
-            quantity: 1,
-          },
-        ],
-      },
+    trackGaEvent("add_to_cart", {
+      value: pricing.finalPrice,
+      items: [
+        {
+          item_id: product.id,
+          item_name: name,
+          price: pricing.finalPrice,
+          quantity: 1,
+        },
+      ],
     });
     addItem(product, 1, pricing.finalPrice);
   }

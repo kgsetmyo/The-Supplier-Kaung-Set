@@ -135,6 +135,13 @@ export async function saveProduct(
             "Cost columns missing. Run migration 034_product_cost_fields.sql in the Supabase SQL Editor, then try again.",
         };
       }
+      if (/row-level security/i.test(error.message)) {
+        return {
+          ok: false,
+          message:
+            "Admin RLS blocked this save. Your login needs profiles.role = admin (run 003_promote_admin.sql / 035_fix_is_admin_profiles.sql), then sign out and sign back in.",
+        };
+      }
       return { ok: false, message: error.message };
     }
 
@@ -155,6 +162,13 @@ export async function saveProduct(
         ok: false,
         message:
           "Cost columns missing. Run migration 034_product_cost_fields.sql in the Supabase SQL Editor, then try again.",
+      };
+    }
+    if (error && /row-level security/i.test(error.message)) {
+      return {
+        ok: false,
+        message:
+          "Admin RLS blocked this save. Your login needs profiles.role = admin (run 003_promote_admin.sql / 035_fix_is_admin_profiles.sql), then sign out and sign back in.",
       };
     }
     return { ok: false, message: error?.message ?? "Could not create product." };

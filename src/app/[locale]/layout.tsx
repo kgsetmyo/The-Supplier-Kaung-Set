@@ -6,7 +6,7 @@ import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { FloatingContactButton } from "@/components/FloatingContactButton";
 import { CartSync } from "@/components/CartSync";
 import { Footer } from "@/components/Footer";
@@ -67,7 +67,8 @@ export default async function LocaleLayout({ children, params }: Props) {
   setRequestLocale(locale);
   const messages = await getMessages();
   const nonce = (await headers()).get("x-nonce") ?? undefined;
-  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
   const themeClass = await getServerThemeClass();
   const themeCookie = (await cookies()).get("ks-theme")?.value;
   const initialTheme = parseThemePreference(themeCookie);
@@ -89,6 +90,8 @@ export default async function LocaleLayout({ children, params }: Props) {
             <FloatingContactButton />
           </NextIntlClientProvider>
         </ThemeProvider>
+        {/* Direct GA4 — primary. GTM is optional and should not also fire the same G- ID. */}
+        {gaId ? <GoogleAnalytics gaId={gaId} nonce={nonce} /> : null}
         {gtmId ? <GoogleTagManager gtmId={gtmId} nonce={nonce} /> : null}
       </body>
     </html>
