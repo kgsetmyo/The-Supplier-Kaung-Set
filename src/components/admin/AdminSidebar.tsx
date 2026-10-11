@@ -15,10 +15,12 @@ import {
   ShoppingCart,
   ClipboardList,
   Bug,
+  ChartColumn,
 } from "lucide-react";
 
 const links = [
   { href: "/admin", labelKey: "overview", icon: LayoutDashboard },
+  { href: "/admin/analytics", labelKey: "profitAnalytics", icon: ChartColumn },
   { href: "/admin/orders", labelKey: "orders", icon: ShoppingBag },
   { href: "/admin/inventory", labelKey: "inventory", icon: Package },
   { href: "/admin/categories", labelKey: "categories", icon: Layers3 },

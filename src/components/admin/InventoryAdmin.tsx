@@ -2,8 +2,11 @@
 
 import { useEffect, useState, useTransition, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
-import { deleteProduct, restoreProduct } from "@/app/actions/product";
+import {
+  deleteProduct,
+  restoreProduct,
+  saveProduct,
+} from "@/app/actions/product";
 import {
   formatMoney,
   PRODUCT_AUTHENTICITY_OPTIONS,
@@ -22,6 +25,8 @@ const emptyForm = {
   description_mm: "",
   price: "",
   discount_price: "",
+  cost_price: "0",
+  delivery_cost: "0",
   image_urls: [""] as string[],
   stock_quantity: "0",
   category_id: "",
@@ -78,6 +83,8 @@ export function InventoryAdmin({
       price: String(product.price),
       discount_price:
         product.discount_price == null ? "" : String(product.discount_price),
+      cost_price: String(product.cost_price ?? 0),
+      delivery_cost: String(product.delivery_cost ?? 0),
       image_urls: gallery.length ? gallery : [""],
       stock_quantity: String(product.stock_quantity),
       category_id: product.category_id ?? "",
@@ -151,11 +158,11 @@ export function InventoryAdmin({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const supabase = createClient();
 
     const imageUrls = form.image_urls.map((u) => u.trim()).filter(Boolean);
 
-    const payload = {
+    const result = await saveProduct({
+      id: editing?.id,
       name_en: form.name_en.trim(),
       name_mm: form.name_mm.trim(),
       description_en: form.description_en.trim(),
@@ -164,19 +171,16 @@ export function InventoryAdmin({
       discount_price: form.discount_price
         ? Number(form.discount_price)
         : null,
-      image_url: imageUrls[0] ?? null,
+      cost_price: Number(form.cost_price || 0),
+      delivery_cost: Number(form.delivery_cost || 0),
       image_urls: imageUrls,
       stock_quantity: Number(form.stock_quantity),
       category_id: form.category_id || null,
       authenticity: form.authenticity,
-    };
+    });
 
-    const result = editing
-      ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
-
-    if (result.error) {
-      setError(result.error.message);
+    if (!result.ok) {
+      setError(result.message);
       return;
     }
 
@@ -320,6 +324,38 @@ export function InventoryAdmin({
                 setForm((f) => ({ ...f, discount_price: e.target.value }))
               }
             />
+          </label>
+          <label className="block text-sm">
+            <span>{t("productCost")}</span>
+            <input
+              type="number"
+              min={0}
+              step="1"
+              className={fieldClass}
+              value={form.cost_price}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, cost_price: e.target.value }))
+              }
+            />
+            <span className="mt-1 block text-xs text-muted">
+              {t("productCostHint")}
+            </span>
+          </label>
+          <label className="block text-sm">
+            <span>{t("deliveryCost")}</span>
+            <input
+              type="number"
+              min={0}
+              step="1"
+              className={fieldClass}
+              value={form.delivery_cost}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, delivery_cost: e.target.value }))
+              }
+            />
+            <span className="mt-1 block text-xs text-muted">
+              {t("deliveryCostHint")}
+            </span>
           </label>
           <label className="block text-sm">
             <span>{t("stock")}</span>

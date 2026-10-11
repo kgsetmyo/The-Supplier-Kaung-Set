@@ -46,6 +46,10 @@ export type Product = {
   description_mm: string;
   price: number;
   discount_price: number | null;
+  /** Internal unit cost (admin / profit tracking only). */
+  cost_price?: number;
+  /** Internal per-unit delivery cost (admin / profit tracking only). */
+  delivery_cost?: number;
   image_url: string | null;
   /** Gallery URLs for carousels (DB: products.image_urls). */
   image_urls?: string[];

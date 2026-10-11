@@ -94,6 +94,8 @@ export async function getAdminProducts() {
     price: Number(row.price),
     discount_price:
       row.discount_price == null ? null : Number(row.discount_price),
+    cost_price: Number(row.cost_price ?? 0),
+    delivery_cost: Number(row.delivery_cost ?? 0),
     stock_quantity: Number(row.stock_quantity),
     category_id: (row.category_id as string | null) ?? null,
     brand_id: (row.brand_id as string | null) ?? null,
@@ -109,6 +111,111 @@ export async function getAdminProducts() {
         : "Genuine",
     is_active: row.is_active !== false,
   })) as Product[];
+}
+
+export type ProfitAnalytics = {
+  unitsSold: number;
+  orderCount: number;
+  grossRevenue: number;
+  totalProductCost: number;
+  totalDeliveryCost: number;
+  totalCosts: number;
+  netProfit: number;
+  /** Orders with sold items but missing cost data on the product. */
+  missingCostUnits: number;
+};
+
+/**
+ * Profit from completed (delivered) orders.
+ * Revenue uses price_at_time (what the customer paid per unit).
+ * Costs use current product cost_price + delivery_cost × quantity.
+ */
+export async function getProfitAnalytics(): Promise<ProfitAnalytics> {
+  const empty: ProfitAnalytics = {
+    unitsSold: 0,
+    orderCount: 0,
+    grossRevenue: 0,
+    totalProductCost: 0,
+    totalDeliveryCost: 0,
+    totalCosts: 0,
+    netProfit: 0,
+    missingCostUnits: 0,
+  };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `
+      id,
+      status,
+      order_items (
+        quantity,
+        price_at_time,
+        products (
+          cost_price,
+          delivery_cost
+        )
+      )
+    `
+    )
+    .eq("status", "delivered");
+
+  if (error) {
+    console.error("[getProfitAnalytics]", error.message);
+    return empty;
+  }
+
+  let unitsSold = 0;
+  let grossRevenue = 0;
+  let totalProductCost = 0;
+  let totalDeliveryCost = 0;
+  let missingCostUnits = 0;
+  const orderIds = new Set<string>();
+
+  for (const order of data ?? []) {
+    const items = (order.order_items ?? []) as {
+      quantity: number;
+      price_at_time: number;
+      products: {
+        cost_price: number | null;
+        delivery_cost: number | null;
+      } | null;
+    }[];
+
+    if (items.length === 0) continue;
+    orderIds.add(String(order.id));
+
+    for (const item of items) {
+      const qty = Number(item.quantity) || 0;
+      if (qty <= 0) continue;
+
+      unitsSold += qty;
+      grossRevenue += qty * Number(item.price_at_time || 0);
+
+      const costPrice = Number(item.products?.cost_price ?? 0);
+      const deliveryCost = Number(item.products?.delivery_cost ?? 0);
+      totalProductCost += qty * costPrice;
+      totalDeliveryCost += qty * deliveryCost;
+
+      if (!item.products || (costPrice === 0 && deliveryCost === 0)) {
+        missingCostUnits += qty;
+      }
+    }
+  }
+
+  const totalCosts = totalProductCost + totalDeliveryCost;
+
+  return {
+    unitsSold,
+    orderCount: orderIds.size,
+    grossRevenue,
+    totalProductCost,
+    totalDeliveryCost,
+    totalCosts,
+    netProfit: grossRevenue - totalCosts,
+    missingCostUnits,
+  };
 }
 
 export async function getStoreSettingsAdmin(): Promise<StoreSettings | null> {
