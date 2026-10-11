@@ -27,8 +27,8 @@ export function trackGaEvent(
 
   try {
     sendGAEvent("event", eventName, {
-      currency: params.currency ?? "MMK",
       ...params,
+      currency: params.currency ?? "MMK",
     });
   } catch {
     // Ignore analytics failures — never block checkout / UI.

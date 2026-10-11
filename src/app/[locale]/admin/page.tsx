@@ -1,19 +1,13 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { getAdminStats } from "@/lib/admin";
-import {
-  getDashboardMetrics,
-  getTopViewedProducts,
-} from "@/lib/analytics";
 import { formatMoney } from "@/types/database";
 import {
   Package,
   ShoppingBag,
   Users,
   AlertTriangle,
-  Eye,
-  MousePointerClick,
-  UserRound,
+  ExternalLink,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,12 +19,8 @@ export default async function AdminOverviewPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
-
-  const [stats, analytics, topProducts] = await Promise.all([
-    getAdminStats(),
-    getDashboardMetrics(),
-    getTopViewedProducts(10),
-  ]);
+  const stats = await getAdminStats();
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
   return (
     <div className="space-y-8">
@@ -47,32 +37,28 @@ export default async function AdminOverviewPage({ params }: Props) {
         <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">
           {t("analyticsTitle")}
         </h2>
-        {analytics ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <StatCard
-              label={t("analyticsActiveUsers")}
-              value={analytics.activeUsers.toLocaleString()}
-              hint={t("analyticsLast7Days")}
-              icon={UserRound}
-            />
-            <StatCard
-              label={t("analyticsPageViews")}
-              value={analytics.pageViews.toLocaleString()}
-              hint={t("analyticsLast7Days")}
-              icon={Eye}
-            />
-            <StatCard
-              label={t("analyticsProductClicks")}
-              value={analytics.productClicks.toLocaleString()}
-              hint={t("analyticsLast7Days")}
-              icon={MousePointerClick}
-            />
-          </div>
-        ) : (
-          <p className="border border-dashed border-border bg-surface px-4 py-6 text-sm font-normal text-foreground">
-            {t("analyticsUnavailable")}
-          </p>
-        )}
+        <div className="border border-border bg-surface px-4 py-5 shadow-sm">
+          <p className="text-sm text-foreground">{t("analyticsGaOnly")}</p>
+          {gaId ? (
+            <p className="mt-2 text-xs text-muted">
+              {t("analyticsMeasurementId")}:{" "}
+              <span className="font-mono font-semibold text-foreground">
+                {gaId}
+              </span>
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-sale">{t("analyticsMissingId")}</p>
+          )}
+          <a
+            href="https://analytics.google.com/analytics/web/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold underline underline-offset-4"
+          >
+            {t("analyticsOpenConsole")}
+            <ExternalLink className="size-3.5" aria-hidden />
+          </a>
+        </div>
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -97,43 +83,6 @@ export default async function AdminOverviewPage({ params }: Props) {
           icon={AlertTriangle}
         />
       </div>
-
-      <section className="border border-border bg-surface shadow-sm">
-        <div className="border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">
-            {t("trendingProducts")}
-          </h2>
-          <p className="mt-0.5 text-xs font-normal text-foreground">
-            {t("trendingProductsHint")}
-          </p>
-        </div>
-        {topProducts.length === 0 ? (
-          <p className="px-4 py-8 text-sm font-normal text-foreground">
-            {t("trendingProductsEmpty")}
-          </p>
-        ) : (
-          <ol className="divide-y divide-border">
-            {topProducts.map((item, index) => (
-              <li
-                key={`${item.name}-${index}`}
-                className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-xs font-semibold text-foreground">
-                    {index + 1}
-                  </span>
-                  <p className="truncate font-semibold text-foreground">
-                    {item.name}
-                  </p>
-                </div>
-                <span className="shrink-0 rounded border border-border bg-background px-2 py-1 text-xs font-bold tabular-nums text-foreground">
-                  {item.views.toLocaleString()} {t("trendingViews")}
-                </span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
 
       <section className="border border-border bg-surface shadow-sm">
         <div className="border-b border-border px-4 py-3">

@@ -15,7 +15,6 @@
     "unrs-resolver": true
   },
   "dependencies": {
-    "@google-analytics/data": "^7.1.0",
     "@next/third-parties": "^16.3.5",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
