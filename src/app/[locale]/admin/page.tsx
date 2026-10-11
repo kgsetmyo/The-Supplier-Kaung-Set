@@ -7,7 +7,6 @@ import {
   ShoppingBag,
   Users,
   AlertTriangle,
-  ExternalLink,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,7 +19,6 @@ export default async function AdminOverviewPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("admin");
   const stats = await getAdminStats();
-  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
   return (
     <div className="space-y-8">
@@ -32,34 +30,6 @@ export default async function AdminOverviewPage({ params }: Props) {
           {t("overviewSubtitle")}
         </p>
       </div>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">
-          {t("analyticsTitle")}
-        </h2>
-        <div className="border border-border bg-surface px-4 py-5 shadow-sm">
-          <p className="text-sm text-foreground">{t("analyticsGaOnly")}</p>
-          {gaId ? (
-            <p className="mt-2 text-xs text-muted">
-              {t("analyticsMeasurementId")}:{" "}
-              <span className="font-mono font-semibold text-foreground">
-                {gaId}
-              </span>
-            </p>
-          ) : (
-            <p className="mt-2 text-sm text-sale">{t("analyticsMissingId")}</p>
-          )}
-          <a
-            href="https://analytics.google.com/analytics/web/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold underline underline-offset-4"
-          >
-            {t("analyticsOpenConsole")}
-            <ExternalLink className="size-3.5" aria-hidden />
-          </a>
-        </div>
-      </section>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
