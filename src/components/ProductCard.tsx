@@ -89,7 +89,7 @@ export function ProductCard({
   }
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface text-foreground">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/80 bg-surface text-foreground transition duration-300 hover:-translate-y-1 hover:border-accent/50">
       <div className="absolute top-3 right-3 z-10">
         <WishlistButton
           productId={product.id}
@@ -108,7 +108,7 @@ export function ProductCard({
             alt={name}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition duration-500 group-hover:scale-[1.03]"
+            className="object-cover transition duration-500 group-hover:scale-[1.05]"
             priority={priority}
           />
         ) : (
@@ -117,16 +117,16 @@ export function ProductCard({
           </div>
         )}
         {pricing.isVipPrice ? (
-          <span className="absolute top-3 left-3 border border-border bg-surface px-2 py-0.5 text-[11px] font-semibold tracking-wide text-foreground uppercase">
+          <span className="absolute top-3 left-3 border border-border bg-accent px-2 py-0.5 text-[11px] font-bold tracking-wide text-accent-fg uppercase">
             {t("product.vipPrice")}
           </span>
         ) : hasCatalogDiscount ? (
           <span
-            className="absolute top-3 left-3 flex h-8 w-8 items-center justify-center rounded-full border border-sale bg-sale text-sm shadow-sm"
+            className="absolute top-3 left-3 border border-sale/30 bg-sale px-2 py-0.5 text-[11px] font-bold tracking-wide text-white uppercase"
             aria-label={t("product.sale")}
             title={t("product.sale")}
           >
-            🏷️
+            {t("product.sale")}
           </span>
         ) : null}
       </Link>
@@ -134,7 +134,7 @@ export function ProductCard({
       <div className="flex flex-1 flex-col gap-2 p-4">
         <AuthenticityBadge authenticity={product.authenticity} size="sm" />
         <Link href={href} onClick={trackViewItem}>
-          <h3 className="text-base font-semibold tracking-tight text-foreground hover:underline">
+          <h3 className="font-display text-base font-bold tracking-tight text-foreground transition group-hover:text-[#2f4a38] hover:underline dark:group-hover:text-accent">
             {name}
           </h3>
         </Link>
@@ -189,7 +189,7 @@ export function ProductCard({
             type="button"
             disabled={outOfStock}
             onClick={trackAddToCart}
-            className="rounded-md bg-accent px-3 py-2 text-xs font-semibold text-accent-fg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-md bg-accent px-3 py-2 text-xs font-extrabold text-accent-fg transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {t("product.addToCart")}
           </button>

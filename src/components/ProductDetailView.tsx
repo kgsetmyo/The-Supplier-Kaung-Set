@@ -165,7 +165,7 @@ export function ProductDetailView({
               });
               addItem(product, 1, pricing.finalPrice);
             }}
-            className="rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-accent-fg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-md bg-accent px-5 py-2.5 text-sm font-extrabold text-accent-fg transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {t("product.addToCart")}
           </button>

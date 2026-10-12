@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Header } from "@/components/Header";
 import { CartDrawer } from "@/components/CartDrawer";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
+import { HomeHero } from "@/components/HomeHero";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/skeletons";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/lib/products";
 import { getReviewSummariesByProductIds } from "@/lib/reviews";
 import { getWishlistProductIds } from "@/lib/wishlist";
+import { productGalleryUrls } from "@/lib/product-media";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -62,21 +64,17 @@ async function HomeProductGrid() {
   );
 }
 
-async function HomeHeading() {
-  const t = await getTranslations("home");
-  return (
-    <div className="mb-6 max-w-xl md:mb-8">
-      <h1 className="text-2xl font-semibold tracking-tight md:text-4xl">
-        {t("title")}
-      </h1>
-      <p className="mt-2 text-sm text-muted md:text-base">{t("subtitle")}</p>
-    </div>
-  );
+async function HomeHeroSection() {
+  const products = await getProducts();
+  const featured =
+    products.find((p) => productGalleryUrls(p).length > 0) ?? products[0] ?? null;
+  return <HomeHero featured={featured} />;
 }
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("home");
 
   return (
     <>
@@ -84,17 +82,25 @@ export default async function HomePage({ params }: Props) {
         <HomeAnnouncement />
       </Suspense>
       <Header />
-      <main className="page-shell storefront-container min-h-[calc(100vh-4rem)]">
-        <Suspense
-          fallback={
-            <div className="mb-6 max-w-xl space-y-3 md:mb-8">
-              <div className="h-8 w-48 animate-pulse rounded bg-gray-200 md:h-9 dark:bg-gray-800" />
-              <div className="h-4 w-72 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
-            </div>
-          }
-        >
-          <HomeHeading />
-        </Suspense>
+      <Suspense
+        fallback={
+          <div className="min-h-[min(88vh,44rem)] w-full animate-pulse bg-[#14241c]" />
+        }
+      >
+        <HomeHeroSection />
+      </Suspense>
+      <main
+        id="shop"
+        className="page-shell storefront-container scroll-mt-24 min-h-[calc(100vh-4rem)]"
+      >
+        <div className="mb-6 md:mb-8">
+          <h2 className="font-display text-2xl font-extrabold tracking-tight md:text-3xl">
+            {t("shelfTitle")}
+          </h2>
+          <p className="mt-2 max-w-xl text-sm text-muted md:text-base">
+            {t("shelfSubtitle")}
+          </p>
+        </div>
         <Suspense fallback={<ProductGridSkeleton count={8} />}>
           <HomeProductGrid />
         </Suspense>

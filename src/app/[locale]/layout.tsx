@@ -1,4 +1,4 @@
-import { Inter, Noto_Sans_Myanmar } from "next/font/google";
+import { Bricolage_Grotesque, Nunito, Noto_Sans_Myanmar } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -14,9 +14,16 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { parseThemePreference } from "@/lib/theme";
 import { getServerThemeClass } from "@/lib/theme-server";
 
-const inter = Inter({
+const display = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-display",
+  display: "swap",
+});
+
+const body = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -32,7 +39,8 @@ export const metadata: Metadata = {
     default: "The supplier Kaung Set",
     template: "%s | The supplier Kaung Set",
   },
-  description: "The supplier Kaung Set — bilingual e-commerce storefront",
+  description:
+    "The supplier Kaung Set — playful bilingual shopping for finds you’ll actually want",
   applicationName: "The supplier Kaung Set",
   appleWebApp: {
     capable: true,
@@ -75,7 +83,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${myanmar.variable} ${themeClass} h-full`}
+      className={`${display.variable} ${body.variable} ${myanmar.variable} ${themeClass} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground antialiased">

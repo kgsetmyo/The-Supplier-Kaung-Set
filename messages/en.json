@@ -4,7 +4,7 @@
     "whatsapp": "Chat on WhatsApp"
   },
   "footer": {
-    "tagline": "Trusted wholesale and retail sourcing — quality goods for Myanmar and beyond.",
+    "tagline": "Playful finds, serious sourcing — quality goods for Myanmar and beyond.",
     "shop": "Shop",
     "products": "All products",
     "categories": "Categories",
@@ -208,8 +208,12 @@
     "resetInvalidBody": "Please request a new password reset link and try again."
   },
   "home": {
-    "title": "Shop",
-    "subtitle": "Simple essentials, carefully selected.",
+    "title": "Find it. Love it. Get it fast.",
+    "subtitle": "Handpicked goods with clear authenticity — tap in, bag it, and we’ll handle the rest.",
+    "ctaShop": "Start shopping",
+    "ctaRequest": "Can’t find it? Request it",
+    "shelfTitle": "Fresh picks waiting for you",
+    "shelfSubtitle": "New arrivals and everyday favorites — add what you want before it’s gone.",
     "empty": "No products found.",
     "loading": "Loading products…"
   },
@@ -239,7 +243,7 @@
   "product": {
     "sale": "Sale",
     "vipPrice": "VIP price",
-    "addToCart": "Add to cart",
+    "addToCart": "Bag it",
     "outOfStock": "Out of stock",
     "inStock": "{count} in stock",
     "lowStock": "Only {count} left in stock",

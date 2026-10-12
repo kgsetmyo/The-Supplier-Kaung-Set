@@ -19,7 +19,7 @@ export function Footer() {
           <p className="brand-logo text-[11px] leading-snug sm:text-xs">
             The supplier Kaung Set
           </p>
-          <p className="max-w-xs text-sm font-normal leading-relaxed text-foreground">
+          <p className="max-w-xs text-sm font-medium leading-relaxed text-muted">
             {t("tagline")}
           </p>
         </div>

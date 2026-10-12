@@ -20,8 +20,8 @@ export function AnnouncementBanner({ announcement }: Props) {
   if (!text?.trim()) return null;
 
   return (
-    <div className="border-b border-border bg-accent text-accent-fg">
-      <p className="mx-auto max-w-6xl px-4 py-2 text-center text-xs tracking-wide sm:px-6 sm:text-sm">
+    <div className="border-b border-[#14241c]/15 bg-accent text-accent-fg">
+      <p className="mx-auto max-w-6xl px-4 py-2.5 text-center text-xs font-bold tracking-wide sm:px-6 sm:text-sm">
         {text}
       </p>
     </div>

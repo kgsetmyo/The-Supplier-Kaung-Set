@@ -25,10 +25,10 @@ type HeaderProps = {
 };
 
 const iconBtnClass =
-  "inline-flex size-11 shrink-0 items-center justify-center rounded-full p-2 text-gray-700 transition-colors duration-200 hover:bg-gray-100 hover:text-black sm:size-10 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white";
+  "inline-flex size-11 shrink-0 items-center justify-center rounded-md p-2 text-foreground transition-colors duration-200 hover:bg-accent/25 hover:text-foreground sm:size-10";
 
 const menuItemClass =
-  "flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-gray-800 transition-colors duration-150 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800";
+  "flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-accent/20";
 
 function SearchBarFallback() {
   return (
@@ -91,7 +91,7 @@ export function Header({ showSearch = true }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-neutral-950/80">
+      <header className="sticky top-0 z-50 border-b border-border/80 bg-surface/85 backdrop-blur-md">
         <div className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-3 md:px-8 md:py-4 lg:px-12">
           {/* Left: hamburger + logo — always above mobile search overlay */}
           <div
@@ -125,12 +125,12 @@ export function Header({ showSearch = true }: HeaderProps) {
                 <div
                   id="header-support-menu"
                   role="menu"
-                  className="absolute left-0 z-50 mt-2 w-[min(16rem,calc(100vw-2rem))] origin-top-left overflow-hidden rounded-xl border border-gray-100 bg-white p-1.5 shadow-lg will-change-[opacity,transform] transition-[opacity,transform] duration-200 ease-out dark:border-gray-800 dark:bg-neutral-900"
+                  className="absolute left-0 z-50 mt-2 w-[min(16rem,calc(100vw-2rem))] origin-top-left overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-lg will-change-[opacity,transform] transition-[opacity,transform] duration-200 ease-out"
                   style={{
                     animation: "headerMenuIn 160ms ease-out both",
                   }}
                 >
-                  <p className="px-3 py-2 text-[10px] font-semibold tracking-widest text-gray-400 uppercase">
+                  <p className="px-3 py-2 text-[10px] font-semibold tracking-widest text-muted uppercase">
                     {t("header.supportMenu")}
                   </p>
                   <button
@@ -166,10 +166,10 @@ export function Header({ showSearch = true }: HeaderProps) {
 
             <Link
               href="/"
-              className={`min-w-0 truncate text-sm font-bold tracking-tight text-gray-900 uppercase sm:text-base md:max-w-none md:text-lg md:tracking-widest dark:text-white ${
+              className={`brand-logo min-w-0 truncate text-[11px] sm:text-xs md:max-w-none md:text-sm ${
                 searchExpanded
                   ? "max-md:pointer-events-none max-md:invisible max-md:w-0 max-md:overflow-hidden"
-                  : "max-w-[7.5rem] sm:max-w-[11rem]"
+                  : "max-w-[7.5rem] sm:max-w-[12rem]"
               }`}
               aria-label="The supplier Kaung Set"
               tabIndex={searchExpanded ? -1 : 0}
@@ -215,7 +215,7 @@ export function Header({ showSearch = true }: HeaderProps) {
               >
                 <ShoppingBag className="size-5" aria-hidden />
                 {visibleCount > 0 ? (
-                  <span className="absolute top-0.5 right-0.5 flex min-w-4 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] font-semibold text-white dark:bg-white dark:text-gray-900">
+                  <span className="absolute top-0.5 right-0.5 flex min-w-4 items-center justify-center rounded-md bg-accent px-1 text-[10px] font-extrabold text-accent-fg">
                     {visibleCount}
                   </span>
                 ) : null}
