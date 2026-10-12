@@ -138,8 +138,8 @@ export function SearchBar({
         isSearchExpanded
           ? // Mobile: absolute cover of the header row (leaves hamburger on the left).
             // md+: inline expanding field in the action cluster.
-            "absolute inset-y-0 right-0 left-12 z-30 flex items-center gap-1 bg-white px-2 dark:bg-neutral-950 md:relative md:inset-auto md:left-auto md:right-auto md:z-auto md:h-10 md:w-56 md:gap-0 md:overflow-hidden md:rounded-full md:bg-gray-100 lg:w-72 dark:md:bg-gray-800"
-          : "relative z-10 flex h-10 w-10 shrink-0 cursor-pointer items-center overflow-hidden rounded-full bg-transparent transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            "absolute inset-y-0 right-0 left-12 z-30 flex items-center gap-1 bg-surface px-2 md:relative md:inset-auto md:left-auto md:right-auto md:z-auto md:h-10 md:w-56 md:gap-0 md:overflow-hidden md:rounded-md md:bg-accent/20 lg:w-72"
+          : "relative z-10 flex h-10 w-10 shrink-0 cursor-pointer items-center overflow-hidden rounded-md bg-transparent transition-colors hover:bg-accent/25"
       }
     >
       <button
@@ -151,7 +151,7 @@ export function SearchBar({
             expand();
           }
         }}
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-gray-700 transition-colors duration-200 hover:text-black dark:text-gray-300 dark:hover:text-white"
+        className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-foreground transition-colors duration-200 hover:text-[#2f4a38]"
         aria-label={
           isSearchExpanded ? t("searchButton") : t("searchPlaceholder")
         }
@@ -173,7 +173,7 @@ export function SearchBar({
         onFocus={onFocus}
         placeholder={isSearchExpanded ? t("searchPlaceholder") : ""}
         tabIndex={isSearchExpanded ? 0 : -1}
-        className={`h-10 min-w-0 flex-1 bg-transparent py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-500 ${
+        className={`h-10 min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted ${
           isSearchExpanded
             ? "opacity-100"
             : "pointer-events-none w-0 p-0 opacity-0"
@@ -193,7 +193,7 @@ export function SearchBar({
             e.preventDefault();
             collapse();
           }}
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-100 hover:text-black md:hidden dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+          className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent/30 md:hidden"
           aria-label={t("closeSearch")}
         >
           <X className="size-5" aria-hidden />

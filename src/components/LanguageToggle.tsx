@@ -9,7 +9,6 @@ const LOCALE_FLAGS: Record<AppLocale, string> = {
   mm: "🇲🇲",
 };
 
-/** Soft pill language toggle for the premium header */
 export function LanguageToggle() {
   const t = useTranslations("header");
   const locale = useLocale() as AppLocale;
@@ -28,7 +27,7 @@ export function LanguageToggle() {
 
   return (
     <div
-      className="inline-flex items-center rounded-full bg-gray-100 p-1 dark:bg-gray-800"
+      className="inline-flex items-center rounded-md bg-accent/25 p-1"
       role="group"
       aria-label={t("switchLanguage")}
     >
@@ -42,10 +41,10 @@ export function LanguageToggle() {
             title={titles[code]}
             aria-label={titles[code]}
             aria-pressed={active}
-            className={`inline-flex size-8 items-center justify-center rounded-full text-sm transition-all ${
+            className={`inline-flex size-8 items-center justify-center rounded-md text-sm transition-all ${
               active
-                ? "bg-white font-semibold text-black shadow-sm dark:bg-neutral-950 dark:text-white"
-                : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                ? "bg-surface font-semibold text-foreground shadow-sm"
+                : "text-muted hover:text-foreground"
             }`}
           >
             <span className="leading-none" aria-hidden>

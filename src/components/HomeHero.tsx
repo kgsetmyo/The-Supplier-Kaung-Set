@@ -13,7 +13,7 @@ export async function HomeHero({ featured }: Props) {
   const cover = featured ? productGalleryUrls(featured)[0] ?? null : null;
 
   return (
-    <section className="relative isolate min-h-[min(88vh,44rem)] w-full overflow-hidden bg-[#14241c] text-[#f4fae8]">
+    <section className="relative isolate min-h-[min(92vh,46rem)] w-full overflow-hidden bg-[#eef8d4] text-foreground">
       <div className="hero-media absolute inset-0">
         {cover ? (
           <Image
@@ -22,52 +22,49 @@ export async function HomeHero({ featured }: Props) {
             fill
             priority
             sizes="100vw"
-            className="object-cover"
+            className="object-cover opacity-90"
           />
-        ) : (
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse 80% 60% at 70% 40%, #3a5a28 0%, transparent 55%), linear-gradient(145deg, #14241c 0%, #1f3a2a 45%, #2a4a20 100%)",
-            }}
-            aria-hidden
-          />
-        )}
+        ) : null}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-[#0e1812]/92 via-[#14241c]/72 to-[#14241c]/35"
+          className="absolute inset-0"
+          style={{
+            background: cover
+              ? "linear-gradient(105deg, #eef8d4 0%, #eef8d4ee 38%, #eef8d466 62%, transparent 100%)"
+              : "radial-gradient(ellipse 70% 60% at 80% 40%, #c6e85a 0%, transparent 55%), linear-gradient(135deg, #eef8d4 0%, #d8f0a0 45%, #ffe0d0 100%)",
+          }}
           aria-hidden
         />
         <div
-          className="absolute inset-0 opacity-30 mix-blend-soft-light"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E\")",
-          }}
+          className="blob-float absolute -top-16 -right-10 size-56 rounded-[40%] bg-[#c6e85a]/55 blur-2xl sm:size-72"
+          aria-hidden
+        />
+        <div
+          className="blob-float absolute bottom-10 left-[-2rem] size-44 rounded-[45%] bg-[#ff8f6b]/35 blur-2xl sm:size-56"
+          style={{ animationDelay: "-3s" }}
           aria-hidden
         />
       </div>
 
-      <div className="hero-copy relative z-10 mx-auto flex min-h-[min(88vh,44rem)] w-full max-w-6xl flex-col justify-end gap-5 px-4 py-14 sm:justify-center sm:py-20 md:px-8 lg:px-12">
-        <p className="brand-logo-on-dark max-w-xl text-sm sm:text-base md:text-lg">
+      <div className="hero-copy relative z-10 mx-auto flex min-h-[min(92vh,46rem)] w-full max-w-6xl flex-col justify-center gap-5 px-4 py-16 md:px-8 lg:px-12">
+        <p className="brand-logo max-w-xl text-sm sm:text-base md:text-lg">
           The supplier Kaung Set
         </p>
-        <h1 className="font-display max-w-2xl text-4xl font-extrabold tracking-tight text-balance sm:text-5xl md:text-6xl">
+        <h1 className="font-display max-w-2xl text-4xl font-extrabold tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl">
           {t("title")}
         </h1>
-        <p className="max-w-md text-base leading-relaxed text-[#d9e8cf] sm:text-lg">
+        <p className="max-w-lg text-base leading-relaxed text-muted sm:text-lg md:text-xl">
           {t("subtitle")}
         </p>
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <a
             href="#shop"
-            className="cta-playful inline-flex items-center justify-center rounded-md bg-accent px-5 py-3 text-sm font-extrabold text-accent-fg transition hover:brightness-105"
+            className="cta-playful inline-flex items-center justify-center rounded-md bg-[#14241c] px-6 py-3.5 text-sm font-extrabold text-[#c6e85a] transition hover:brightness-110 sm:text-base"
           >
             {t("ctaShop")}
           </a>
           <Link
             href="/request-product"
-            className="inline-flex items-center justify-center rounded-md border border-[#f4fae8]/35 bg-transparent px-5 py-3 text-sm font-bold text-[#f4fae8] transition hover:border-[#f4fae8]/70 hover:bg-[#f4fae8]/10"
+            className="inline-flex items-center justify-center rounded-md border-2 border-[#14241c]/25 bg-surface/80 px-6 py-3.5 text-sm font-bold text-foreground backdrop-blur-sm transition hover:border-[#14241c]/55 hover:bg-accent/40 sm:text-base"
           >
             {t("ctaRequest")}
           </Link>

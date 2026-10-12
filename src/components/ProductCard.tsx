@@ -134,7 +134,7 @@ export function ProductCard({
       <div className="flex flex-1 flex-col gap-2 p-4">
         <AuthenticityBadge authenticity={product.authenticity} size="sm" />
         <Link href={href} onClick={trackViewItem}>
-          <h3 className="font-display text-base font-bold tracking-tight text-foreground transition group-hover:text-[#2f4a38] hover:underline dark:group-hover:text-accent">
+          <h3 className="font-display text-base font-bold tracking-tight text-foreground transition group-hover:text-[#2f4a38] hover:underline">
             {name}
           </h3>
         </Link>

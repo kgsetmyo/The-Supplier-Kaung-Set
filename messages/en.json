@@ -146,9 +146,7 @@
     "supportMenu": "Support",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "closeSearch": "Close search",
-    "themeLight": "Switch to light mode",
-    "themeDark": "Switch to dark mode"
+    "closeSearch": "Close search"
   },
   "wishlist": {
     "title": "My Wishlist",
@@ -212,8 +210,16 @@
     "subtitle": "Handpicked goods with clear authenticity — tap in, bag it, and we’ll handle the rest.",
     "ctaShop": "Start shopping",
     "ctaRequest": "Can’t find it? Request it",
+    "why1Title": "Real labels, clear calls",
+    "why1Body": "Genuine, OEM, or Replica — we say it upfront so you shop with confidence.",
+    "why2Title": "Bag it in a tap",
+    "why2Body": "Guest checkout, KBZ Pay, and tracking that actually keeps you in the loop.",
+    "why3Title": "Ask us to source it",
+    "why3Body": "Missing something? Request the item and we’ll chase it down for you.",
+    "shelfEyebrow": "Shop the shelf",
     "shelfTitle": "Fresh picks waiting for you",
     "shelfSubtitle": "New arrivals and everyday favorites — add what you want before it’s gone.",
+    "shelfCta": "Browse all picks",
     "empty": "No products found.",
     "loading": "Loading products…"
   },

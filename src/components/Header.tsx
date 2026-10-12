@@ -16,7 +16,6 @@ import { useCartHasHydrated, useCartStore } from "@/store/cart";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { SearchBar } from "@/components/SearchBar";
 import { AuthMenu } from "@/components/AuthMenu";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { TrackOrderModal } from "@/components/TrackOrderModal";
 import { CategoryExplorer } from "@/components/CategoryExplorer";
 
@@ -33,7 +32,7 @@ const menuItemClass =
 function SearchBarFallback() {
   return (
     <div
-      className="size-10 shrink-0 animate-pulse rounded-full bg-gray-100 dark:bg-gray-800"
+      className="size-10 shrink-0 animate-pulse rounded-md bg-accent/30"
       aria-hidden
     />
   );
@@ -195,7 +194,6 @@ export function Header({ showSearch = true }: HeaderProps) {
                 searchExpanded ? "max-md:pointer-events-none max-md:invisible" : ""
               }`}
             >
-              <ThemeToggle />
               <LanguageToggle />
               <AuthMenu />
               <Link

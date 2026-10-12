@@ -52,37 +52,37 @@ export function LoyaltyCard({
     ? "from-[#1a1408] via-[#3d2e12] to-[#8a6a1f] text-[#f5e6b8] ring-[#c9a227]/40"
     : lower.includes("elite") || lower.includes("vip")
       ? "from-[#0c0c0c] via-[#1a1a1a] to-[#2a2a2a] text-white ring-white/10"
-      : "from-gray-50 via-white to-gray-100 text-gray-900 ring-gray-200 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 dark:text-gray-100 dark:ring-zinc-700";
+      : "from-[#f4fae8] via-white to-[#e8f7b8] text-foreground ring-[#c9dbb8]";
 
   const trackClass =
     lower.includes("vvip") || lower.includes("elite") || lower.includes("vip")
       ? "bg-white/20"
-      : "bg-gray-200 dark:bg-zinc-700";
+      : "bg-accent/35";
 
   const fillClass =
     lower.includes("vvip") || lower.includes("elite") || lower.includes("vip")
       ? "bg-current opacity-80"
-      : "bg-gray-900 dark:bg-gray-100";
+      : "bg-[#14241c]";
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-transparent bg-gradient-to-br p-6 shadow-[0_16px_40px_rgba(0,0,0,0.12)] ring-1 dark:border-zinc-800 dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)] ${style}`}
+      className={`relative overflow-hidden rounded-2xl border border-transparent bg-gradient-to-br p-6 shadow-[0_16px_40px_rgba(20,36,28,0.12)] ring-1 ${style}`}
     >
-      <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-80 dark:opacity-70">
+      <p className="text-[11px] font-semibold tracking-[0.2em] uppercase opacity-80">
         The supplier Kaung Set
       </p>
       <h2 className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">
         {tierName}
       </h2>
       {discount > 0 ? (
-        <p className="mt-1 text-sm font-normal opacity-90 dark:text-gray-300 dark:opacity-100">
+        <p className="mt-1 text-sm font-normal opacity-90">
           {labels.discount.replace("{pct}", String(discount))}
         </p>
       ) : null}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <div>
-          <p className="text-[11px] font-semibold tracking-wide uppercase opacity-70 dark:text-gray-400 dark:opacity-100">
+          <p className="text-[11px] font-semibold tracking-wide uppercase opacity-70">
             {labels.lifetimeSpend}
           </p>
           <p className="mt-1 text-xl font-semibold">
@@ -90,10 +90,10 @@ export function LoyaltyCard({
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold tracking-wide uppercase opacity-70 dark:text-gray-400 dark:opacity-100">
+          <p className="text-[11px] font-semibold tracking-wide uppercase opacity-70">
             {next ? labels.nextTier : labels.maxTier}
           </p>
-          <p className="mt-1 text-sm font-semibold dark:text-gray-100">
+          <p className="mt-1 text-sm font-semibold">
             {next
               ? `${next.tier_name} · ${formatMoney(remaining, currencyPrefix)}`
               : tierName}

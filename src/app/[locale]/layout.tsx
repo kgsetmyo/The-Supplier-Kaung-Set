@@ -5,14 +5,11 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { FloatingContactButton } from "@/components/FloatingContactButton";
 import { CartSync } from "@/components/CartSync";
 import { Footer } from "@/components/Footer";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { parseThemePreference } from "@/lib/theme";
-import { getServerThemeClass } from "@/lib/theme-server";
 
 const display = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -76,27 +73,23 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
-  const themeClass = await getServerThemeClass();
-  const themeCookie = (await cookies()).get("ks-theme")?.value;
-  const initialTheme = parseThemePreference(themeCookie);
 
   return (
     <html
       lang={locale}
-      className={`${display.variable} ${body.variable} ${myanmar.variable} ${themeClass} h-full`}
+      className={`${display.variable} ${body.variable} ${myanmar.variable} h-full`}
+      style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground antialiased">
-        <ThemeProvider defaultTheme="system" initialTheme={initialTheme}>
-          <NextIntlClientProvider messages={messages}>
-            <div className="flex min-h-full flex-col">
-              <div className="flex-1">{children}</div>
-              <Footer />
-            </div>
-            <CartSync />
-            <FloatingContactButton />
-          </NextIntlClientProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider messages={messages}>
+          <div className="flex min-h-full flex-col">
+            <div className="flex-1">{children}</div>
+            <Footer />
+          </div>
+          <CartSync />
+          <FloatingContactButton />
+        </NextIntlClientProvider>
         {gaId ? <GoogleAnalytics gaId={gaId} nonce={nonce} /> : null}
       </body>
     </html>

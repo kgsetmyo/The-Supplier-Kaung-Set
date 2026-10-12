@@ -1,33 +1,19 @@
 @import "tailwindcss";
 
-/* Class-based dark mode (Tailwind v4 + ThemeProvider) */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* Fresh bazaar — playful ink + lime zest (not purple / cream-terracotta) */
+/* Daytime-only storefront — no dark mode */
 :root {
-  --background: #f3f7ef;
+  color-scheme: light;
+  --background: #f2f8e8;
   --foreground: #14241c;
-  --muted: #5c6f64;
-  --border: #d5e0d4;
-  --surface: #fbfdf8;
+  --muted: #4f6758;
+  --border: #c9dbb8;
+  --surface: #fcfef7;
   --accent: #c6e85a;
   --accent-fg: #14241c;
   --sale: #e85d4c;
   --ink: #14241c;
-  --haze: #dff0c8;
-}
-
-.dark {
-  --background: #0e1612;
-  --foreground: #eef5e8;
-  --muted: #9aafa1;
-  --border: #24352c;
-  --surface: #152019;
-  --accent: #c6e85a;
-  --accent-fg: #14241c;
-  --sale: #ff7a6b;
-  --ink: #eef5e8;
-  --haze: #1c3226;
+  --haze: #dff3b8;
+  --pop: #ff8f6b;
 }
 
 @theme inline {
@@ -75,7 +61,7 @@ body {
 
 @keyframes heroDrift {
   from {
-    transform: scale(1.06);
+    transform: scale(1.08);
   }
   to {
     transform: scale(1);
@@ -88,7 +74,17 @@ body {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes floatBlob {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(12px, -10px) rotate(4deg);
   }
 }
 
@@ -114,29 +110,27 @@ body {
 }
 
 .cta-playful {
-  animation: ctaNudge 2.8s ease-in-out infinite;
+  animation: ctaNudge 2.6s ease-in-out infinite;
+}
+
+.blob-float {
+  animation: floatBlob 9s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-copy > *,
   .hero-media,
-  .cta-playful {
+  .cta-playful,
+  .blob-float {
     animation: none !important;
   }
 }
 
-/* Soft page atmosphere — lime haze, not flat gray */
 .page-shell {
   background:
-    radial-gradient(ellipse 90% 55% at 12% -10%, var(--haze) 0%, transparent 58%),
-    radial-gradient(ellipse 70% 40% at 100% 0%, #e7f2d8 0%, transparent 50%),
-    var(--background);
-}
-
-.dark .page-shell {
-  background:
-    radial-gradient(ellipse 90% 55% at 12% -10%, var(--haze) 0%, transparent 58%),
-    radial-gradient(ellipse 70% 40% at 100% 0%, #183024 0%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 0% 0%, #e8f7b8 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 100% 8%, #ffd8c4 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 100%, #d4f0a8 0%, transparent 55%),
     var(--background);
 }
 
@@ -262,35 +256,17 @@ button {
   font: inherit;
 }
 
-/* Wordmark — lively ink-to-lime, still brand-first */
 .brand-logo {
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1.15;
-  background: linear-gradient(115deg, #14241c 0%, #2f4a38 55%, #7a9a3a 100%);
+  background: linear-gradient(115deg, #14241c 0%, #3d6b28 50%, #8fb83a 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-}
-
-.dark .brand-logo {
-  background: linear-gradient(115deg, #f4fae8 0%, #d7e8a8 50%, #c6e85a 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-
-.brand-logo-on-dark {
-  font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  line-height: 1.15;
-  color: #f4fae8;
 }
 
 @media print {
